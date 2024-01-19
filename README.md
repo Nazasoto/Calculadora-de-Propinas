@@ -38,4 +38,4 @@ La aplicación estará disponible en [http://localhost:8080](http://localhost:80
 
 ## Contribuciones
 
-¡Todas las contribuciones son bienvenidas! Si encuentras algún problema o tienes alguna mejora, por favor, abre un problema o envía una solicitud de extracción.
+¡Las contribuciones son bienvenidas! Si encontrás algún problema o tenés alguna mejora, por favor, abre un problema o envía una solicitud de extracción.
