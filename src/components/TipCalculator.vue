@@ -1,21 +1,20 @@
 <template>
-  <div class="center-container">
+  <div class="calculator-container">
     <h1>Calculadora de Propinas</h1>
 
     <div>
       <label>Monto de la cuenta: $</label>
-      <input v-model="billAmount" type="number" />
+      <input v-model="billAmount" type="text" pattern="[0-9]+" />
     </div>
 
     <div>
       <label>Porcentaje de propina predeterminado:</label>
-      <input v-model="defaultTipPercentage" type="number" />
-      <span>%</span>
+      <input v-model="defaultTipPercentage" type="text" pattern="[0-9]+" />
     </div>
 
     <div>
       <label>Cantidad de personas:</label>
-      <input v-model="numberOfPeople" type="number" />
+      <input v-model="numberOfPeople" type="text" pattern="[0-9]+" />
     </div>
 
     <div>
@@ -27,16 +26,13 @@
       </select>
     </div>
 
-    <button @click="calculateTip">Calcular Propina</button>
-
     <div v-if="totalTip !== null" class="center-content">
-  <p>Monto de la propina: ${{ formatCurrency(tipAmount) }}</p>
-  <p>Total a pagar: ${{ formatCurrency(roundedTotal) }}</p>
-  <p>Total por persona: ${{ formatCurrency(totalPerPerson) }}</p>
+      <p>Monto de la propina: {{ formattedCurrency(tipAmount) }}</p>
+      <p>Total a pagar: {{ formattedCurrency(roundedTotal) }}</p>
+      <p>Total por persona: {{ formattedCurrency(totalPerPerson) }}</p>
 
-  <button @click="printOrSendEmail">Imprimir/Enviar por correo electrónico</button>
-  </div>
-
+      <button @click="printOrSendEmail" :key="someUniqueKey">Imprimir / Enviar por correo electrónico</button>
+    </div>
   </div>
 </template>
 
@@ -45,7 +41,7 @@ export default {
   data() {
     return {
       billAmount: 0,
-      defaultTipPercentage: 15,
+      defaultTipPercentage: 10,
       numberOfPeople: 1,
       roundingOption: 'ninguno',
       totalTip: 0,
@@ -53,15 +49,15 @@ export default {
   },
   computed: {
     roundedTotal() {
-    if (this.roundingOption === 'ninguno') {
-      return this.totalAmount;
-    } else if (this.roundingOption === 'total') {
-      return Math.round(this.totalAmount);
-    } else if (this.roundingOption === 'porPersona') {
-      return Math.round(this.totalPerPerson * this.numberOfPeople);
-    }
-    return this.totalAmount; // Por defecto, no redondear
-  },
+      if (this.roundingOption === 'ninguno') {
+        return this.totalAmount;
+      } else if (this.roundingOption === 'total') {
+        return Math.round(this.totalAmount);
+      } else if (this.roundingOption === 'porPersona') {
+        return Math.round(this.totalPerPerson * this.numberOfPeople);
+      }
+      return this.totalAmount; // Por defecto, no redondear
+    },
     tipAmount() {
       return (parseFloat(this.billAmount) * parseFloat(this.defaultTipPercentage)) / 100;
     },
@@ -71,14 +67,23 @@ export default {
     totalPerPerson() {
       return this.totalAmount / this.numberOfPeople;
     },
+    isInvalidInput() {
+      const parsedBill = parseFloat(this.billAmount);
+      const parsedTipPercentage = parseFloat(this.defaultTipPercentage);
+      const parsedNumberOfPeople = parseInt(this.numberOfPeople);
+
+      return isNaN(parsedBill) || isNaN(parsedTipPercentage) || isNaN(parsedNumberOfPeople) || 
+             parsedBill < 1 || parsedTipPercentage < 10 || parsedNumberOfPeople < 1;
+    },
   },
   methods: {
     calculateTip() {
       const parsedBill = parseFloat(this.billAmount);
       const parsedTipPercentage = parseFloat(this.defaultTipPercentage);
 
-      if (isNaN(parsedBill) || isNaN(parsedTipPercentage) || parsedBill <= 0 || parsedTipPercentage < 0) {
-        alert('Por favor, ingrese valores válidos.');
+      if (isNaN(parsedBill) || isNaN(parsedTipPercentage) || 
+          parsedBill < 1 || parsedTipPercentage < 10) {
+        alert('Por favor, ingrese valores válidos. El monto de la cuenta debe ser mayor a 1 y el porcentaje de propina no puede ser menor al 10%.');
         return;
       }
 
@@ -87,16 +92,15 @@ export default {
     printOrSendEmail() {
       alert("Imprimir o enviar por correo electrónico...");
     },
-    formatCurrency(value) {
+    formattedCurrency(value) {
       if (value === undefined || value === null || isNaN(value)) {
         return '';
       }
 
-      return parseFloat(value).toFixed(2);
+      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(parseFloat(value));
     },
   },
 };
 </script>
 
 <style src="../scss/main.scss" scoped lang="scss"></style>
-
